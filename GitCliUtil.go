@@ -47,6 +47,10 @@ func (impl *GitUtil) runCommandWithCred(cmd *exec.Cmd, userName, password string
 
 func (impl *GitUtil) runCommand(cmd *exec.Cmd) (response, errMsg string, err error) {
 	cmd.Env = append(cmd.Env, "HOME=/dev/null")
+
+	log.Println("cmd.String()", cmd.String())
+	log.Println("cmd.Env", cmd.Env)
+
 	outBytes, err := cmd.CombinedOutput()
 	if err != nil {
 		exErr, ok := err.(*exec.ExitError)
