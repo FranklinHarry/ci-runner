@@ -50,11 +50,15 @@ func (impl *GitUtil) runCommand(cmd *exec.Cmd) (response, errMsg string, err err
 	outBytes, err := cmd.CombinedOutput()
 	if err != nil {
 		exErr, ok := err.(*exec.ExitError)
+		log.Println(devtron, "exErr.Stderr err", err)
+		log.Println(devtron, "exErr.Stderr outer", string(exErr.Stderr))
+		log.Println(devtron, "exErr.Stderr outer Error", exErr.String())
+		log.Println(devtron, "exErr.Stderr outer Exit code", string(exErr.ExitCode()))
+		log.Println(devtron, "exErr.Stderr outer success", exErr.Success())
 		if !ok {
 			log.Println(devtron, "exErr.Stderr inner", string(exErr.Stderr))
 			return "", "", err
 		}
-		log.Println(devtron, "exErr.Stderr outer", string(exErr.Stderr))
 		errOutput := string(exErr.Stderr)
 		return "", errOutput, err
 	}
