@@ -451,6 +451,7 @@ func runCIStages(ciCdRequest *CiCdTriggerEvent) (artifactUploaded bool, err erro
 		scanEvent := &ScanEvent{Image: dest, ImageDigest: digest, PipelineId: ciCdRequest.CiRequest.PipelineId, UserId: ciCdRequest.CiRequest.TriggeredBy}
 		scanEvent.AccessKey = ciCdRequest.CiRequest.AccessKey
 		scanEvent.SecretKey = ciCdRequest.CiRequest.SecretKey
+		scanEvent.AwsRegion = ciCdRequest.CiRequest.AwsRegion
 		err = SendEventToClairUtility(scanEvent)
 		if err != nil {
 			log.Println(err)
