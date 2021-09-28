@@ -44,14 +44,20 @@ func StartDockerDaemon(dockerConnection, dockerRegistryUrl, dockerCert string) {
 	connection := dockerConnection
 	domain := strings.ReplaceAll(dockerRegistryUrl, "https://", "")
 	domain = strings.ReplaceAll(dockerRegistryUrl, "http://", "")
+	TESTING := `---------------TESTING:  %s--------------------`
+	log.Println(fmt.Sprintf(TESTING, domain))
+
 	if connection == insecure {
 		dockerdstart := "dockerd --insecure-registry " + domain + " --host=unix:///var/run/docker.sock --host=tcp://0.0.0.0:2375 > /usr/local/bin/nohup.out 2>&1 &"
 		out, _ := exec.Command("/bin/sh", "-c", dockerdstart).Output()
 		logStage("Insecure Registry")
+		log.Println(fmt.Sprintf(TESTING, dockerdstart))
 		log.Println(string(out))
 		waitForDockerDaemon(retryCount)
 	} else {
+		log.Println(fmt.Sprintf(TESTING, "reached secureWithCert"))
 		if connection == secureWithCert {
+			log.Println(fmt.Sprintf(TESTING, "creating cert file"))
 			os.MkdirAll("/etc/docker/certs.d/"+domain, os.ModePerm)
 			f, err := os.Create("/etc/docker/certs.d/" + domain + "/ca.crt")
 
@@ -66,11 +72,35 @@ func StartDockerDaemon(dockerConnection, dockerRegistryUrl, dockerCert string) {
 			if err2 != nil {
 				log.Fatal(err2)
 			}
+
+			if _, err := os.Stat("/etc/docker/certs.d/" + domain + "/ca.crt"); os.IsNotExist(err) {
+				log.Println(fmt.Sprintf(TESTING, "file does not exists"))
+			} else {
+				log.Println(fmt.Sprintf(TESTING, "file exists"))
+				file, err := os.Open("/etc/docker/certs.d/" + domain + "/ca.crt")
+				if err != nil {
+					log.Fatal(err)
+				}
+				defer func() {
+					if err = file.Close(); err != nil {
+						log.Fatal(err)
+					}
+				}()
+
+				b, err := ioutil.ReadAll(file)
+				if err != nil {
+					log.Fatal(err)
+				}
+				fmt.Print(b)
+				log.Println(fmt.Sprintf(TESTING, string(b)))
+				log.Println(fmt.Sprintf(TESTING, "file exists"))
+			}
+
 		}
 		dockerdStart := "dockerd --host=unix:///var/run/docker.sock --host=tcp://0.0.0.0:2375 > /usr/local/bin/nohup.out 2>&1 &"
 		out, _ := exec.Command("/bin/sh", "-c", dockerdStart).Output()
 		logStage("Secure with Cert")
-
+		log.Println(fmt.Sprintf(TESTING, dockerdStart))
 		log.Println(string(out))
 		waitForDockerDaemon(retryCount)
 	}
